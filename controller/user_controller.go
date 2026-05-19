@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"sysemp_feed/model"
 	"sysemp_feed/usecase"
@@ -28,9 +29,10 @@ func (u *UserController) CreateUser(ctx *gin.Context) {
 	}
 
 	_, err = u.UserUseCase.CreateUser(ctx.Request.Context(), user)
+	fmt.Println("Erro", err)
 	if err != nil {
 		if err.Error() == "email already exists" {
-			ctx.JSON(http.StatusConflict, gin.H{"error": "email already exists"})
+			ctx.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
 			return
 		}
 

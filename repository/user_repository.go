@@ -28,7 +28,11 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*User, 
 	var user User
 	err := r.DB.QueryRowContext(ctx, "SELECT id_user, username, password FROM users WHERE email = $1",
 		email).Scan(&user.ID, &user.Username, &user.PasswordHash)
+	fmt.Println("FindByEmail error:", err)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &user, nil
@@ -37,16 +41,14 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*User, 
 func (r *UserRepository) IsApprovedUser(ctx context.Context, id int64) (bool, error) {
 	var id_user int64
 	err := r.DB.QueryRowContext(ctx, "SELECT id_user FROM approved_users WHERE id_user = $1", id).Scan(&id_user)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return false, nil
+			return true, nil
 		}
 		return false, err
 	}
 
-	if id_user == 0 {
-		return true, nil
-	}
 	return false, nil
 }
 
@@ -70,9 +72,7 @@ func (ur *UserRepository) CreateUser(ctx context.Context, user model.User) (int,
 
 	retornoUser, err := ur.FindByEmail(ctx, user.Email)
 	if err != nil {
-		if err != sql.ErrNoRows {
-			return 0, err
-		}
+		return 0, err
 	}
 
 	if retornoUser != nil {
