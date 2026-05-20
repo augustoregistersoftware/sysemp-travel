@@ -18,6 +18,7 @@ services:
       DB_USER: sysemp
       DB_PASSWORD: eyJhbGciOiJIUzI1Ni
       DB_NAME: sysemp_feed_db
+      REDIS_ADDR: redis:6379
 
 
   sysemp_feed_db:
@@ -27,8 +28,6 @@ services:
       POSTGRES_USER: sysemp
       POSTGRES_PASSWORD: eyJhbGciOiJIUzI1Ni
       POSTGRES_DB: sysemp_feed_db
-
-      REDIS_ADDR: redis:6379
 
     ports:
       - "5432:5432"

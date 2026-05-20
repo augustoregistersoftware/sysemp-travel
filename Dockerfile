@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-EXPOSE 8000
+EXPOSE 8080
 
 RUN go build -o /usr/local/bin/api ./cmd/api
 # RUN go build -o /usr/local/bin/worker ./cmd/worker
