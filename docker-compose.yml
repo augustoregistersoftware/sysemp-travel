@@ -9,6 +9,8 @@ services:
     depends_on:
       sysemp_feed_db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
     environment:
       DB_HOST: sysemp_feed_db
@@ -26,6 +28,8 @@ services:
       POSTGRES_PASSWORD: eyJhbGciOiJIUzI1Ni
       POSTGRES_DB: sysemp_feed_db
 
+      REDIS_ADDR: redis:6379
+
     ports:
       - "5432:5432"
 
@@ -39,5 +43,21 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   pgdata: {}
+  redis_data: {}

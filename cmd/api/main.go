@@ -5,11 +5,13 @@ import (
 	"sysemp_feed/auth"
 	"sysemp_feed/controller"
 	"sysemp_feed/db"
+	"sysemp_feed/middleware"
 	"sysemp_feed/repository"
 	"sysemp_feed/usecase"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 )
 
 func main() {
@@ -34,6 +36,24 @@ func main() {
 		getEnv("JWT_SECRET", "dev-secret-change-me"),
 		24*time.Hour,
 	)
+
+	// =========================
+	// REDIS
+	// =========================
+
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: getEnv("REDIS_ADDR", "redis:6379"),
+	})
+
+	defer redisClient.Close()
+
+	rateLimiter := middleware.NewRateLimiter(
+		redisClient,
+		10,
+		time.Minute,
+	)
+
+	server.Use(middleware.RateLimiterMiddleware(rateLimiter))
 
 	// =========================
 	// DEPENDENCY INJECTION
