@@ -18,11 +18,8 @@ CREATE TABLE IF NOT EXISTS approved_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS feed (
-    id_feed SERIAL PRIMARY KEY,
-    description TEXT,
-    link_photo TEXT,
-    likes_count INTEGER NOT NULL DEFAULT 0,
-    published_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+ALTER TABLE approved_users
+ADD COLUMN negated BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE approved_users
+ADD COLUMN email_user VARCHAR(255) NOT NULL DEFAULT '';

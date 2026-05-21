@@ -1,4 +1,4 @@
-module sysemp_feed
+module sysemp_travel
 
 go 1.25.1
 

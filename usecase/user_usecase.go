@@ -2,8 +2,8 @@ package usecase
 
 import (
 	"context"
-	"sysemp_feed/model"
-	"sysemp_feed/repository"
+	"sysemp_travel/model"
+	"sysemp_travel/repository"
 )
 
 type UserUseCase struct {
@@ -27,4 +27,8 @@ func (u *UserUseCase) CreateUser(ctx context.Context, user model.User) (model.Us
 
 func (u *UserUseCase) ApproveUser(ctx context.Context, id string) error {
 	return u.repository.ApproveUser(ctx, id)
+}
+
+func (u *UserUseCase) ReproveUser(ctx context.Context, id string) error {
+	return u.repository.ReproveUser(ctx, id)
 }

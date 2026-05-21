@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"sysemp_feed/config"
-	"sysemp_feed/model"
+	"sysemp_travel/config"
+	"sysemp_travel/model"
 )
 
 type User struct {
@@ -52,15 +52,15 @@ func (r *UserRepository) IsApprovedUser(ctx context.Context, id int64) (bool, er
 	return false, nil
 }
 
-func (r *UserRepository) CreateUserApprove(ctx context.Context, id int64) error {
+func (r *UserRepository) CreateUserApprove(ctx context.Context, id int64, email string) error {
 	_, err := r.DB.ExecContext(
 		ctx,
-		"INSERT INTO approved_users (id_user) VALUES ($1)",
+		"INSERT INTO approved_users (id_user,email_user) VALUES ($1, $2)",
 		id,
+		email,
 	)
 
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -81,7 +81,6 @@ func (ur *UserRepository) CreateUser(ctx context.Context, user model.User) (int,
 
 	passwordEncrypted, err := config.HashPassword(user.Password)
 	if err != nil {
-		fmt.Println(err)
 		return 0, err
 	}
 
@@ -94,13 +93,11 @@ func (ur *UserRepository) CreateUser(ctx context.Context, user model.User) (int,
 	).Scan(&id_user)
 
 	if err != nil {
-		fmt.Println(err)
 		return 0, err
 	}
 
-	err = ur.CreateUserApprove(ctx, int64(id_user))
+	err = ur.CreateUserApprove(ctx, int64(id_user), user.Email)
 	if err != nil {
-		fmt.Println(err)
 		return 0, err
 	}
 
@@ -115,9 +112,28 @@ func (ur *UserRepository) ApproveUser(ctx context.Context, id string) error {
 	)
 
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
+
+	return nil
+}
+
+func (ur *UserRepository) ReproveUser(ctx context.Context, id string) error {
+	_, err := ur.DB.ExecContext(
+		ctx,
+		"UPDATE approved_users SET negated = TRUE WHERE id_user = $1",
+		id,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = ur.DB.ExecContext(
+		ctx,
+		"DELETE FROM users WHERE id_user = $1",
+		id,
+	)
 
 	return nil
 }

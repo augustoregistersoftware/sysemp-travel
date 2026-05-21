@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: sysemp_feed API
+  title: sysemp_travel API
   version: 1.0.0
   description: API para cadastro de usuarios e autenticacao por JWT.
 servers:

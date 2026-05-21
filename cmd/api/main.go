@@ -5,12 +5,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sysemp_feed/auth"
-	"sysemp_feed/controller"
-	"sysemp_feed/db"
-	"sysemp_feed/middleware"
-	"sysemp_feed/repository"
-	"sysemp_feed/usecase"
+	"sysemp_travel/auth"
+	"sysemp_travel/controller"
+	"sysemp_travel/db"
+	"sysemp_travel/middleware"
+	"sysemp_travel/repository"
+	"sysemp_travel/usecase"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -88,6 +88,7 @@ func main() {
 	// =========================
 	server.POST("/login", authController.Login)
 	server.POST("/create_user", UserController.CreateUser)
+	server.PATCH("/reproved_user/:id", UserController.ReproveUser)
 	server.DELETE("/approved_user/:id", UserController.ApproveUser)
 
 	server.Run(":8080")

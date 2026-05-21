@@ -1,10 +1,9 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
-	"sysemp_feed/model"
-	"sysemp_feed/usecase"
+	"sysemp_travel/model"
+	"sysemp_travel/usecase"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,6 +28,16 @@ func (u *UserController) ApproveUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "User approved successfully"})
 }
 
+func (u *UserController) ReproveUser(ctx *gin.Context) {
+	id := ctx.Param("id")
+	err := u.UserUseCase.ReproveUser(ctx.Request.Context(), id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "User reproved successfully"})
+}
+
 func (u *UserController) CreateUser(ctx *gin.Context) {
 	var user model.User
 
@@ -39,9 +48,8 @@ func (u *UserController) CreateUser(ctx *gin.Context) {
 	}
 
 	_, err = u.UserUseCase.CreateUser(ctx.Request.Context(), user)
-	fmt.Println("Erro", err)
 	if err != nil {
-		if err.Error() == "email already exists" {
+		if err.Error() == "user already exists" {
 			ctx.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
 			return
 		}

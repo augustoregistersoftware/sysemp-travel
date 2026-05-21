@@ -1,36 +1,36 @@
 services:
-  sysemp-feed:
-    image: sysemp-feed
+  sysemp-travel:
+    image: sysemp-travel
     build: .
     restart: unless-stopped
     ports:
       - "8080:8080"
 
     depends_on:
-      sysemp_feed_db:
+      sysemp_travel_db:
         condition: service_healthy
       redis:
         condition: service_healthy
 
     environment:
-      DB_HOST: sysemp_feed_db
+      DB_HOST: sysemp_travel_db
       DB_PORT: 5432
       DB_USER: sysemp
       DB_PASSWORD: eyJhbGciOiJIUzI1Ni
-      DB_NAME: sysemp_feed_db
+      DB_NAME: sysemp_travel_db
       REDIS_ADDR: redis:6379
       RATE_LIMIT_ENABLED: "${RATE_LIMIT_ENABLED:-true}"
       RATE_LIMIT_REQUESTS: "${RATE_LIMIT_REQUESTS:-10}"
       RATE_LIMIT_WINDOW_SECONDS: "${RATE_LIMIT_WINDOW_SECONDS:-60}"
 
 
-  sysemp_feed_db:
+  sysemp_travel_db:
     image: postgres:12
 
     environment:
       POSTGRES_USER: sysemp
       POSTGRES_PASSWORD: eyJhbGciOiJIUzI1Ni
-      POSTGRES_DB: sysemp_feed_db
+      POSTGRES_DB: sysemp_travel_db
 
     ports:
       - "5432:5432"
@@ -40,7 +40,7 @@ services:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sysemp -d sysemp_feed_db"]
+      test: ["CMD-SHELL", "pg_isready -U sysemp -d sysemp_travel_db"]
       interval: 5s
       timeout: 5s
       retries: 10

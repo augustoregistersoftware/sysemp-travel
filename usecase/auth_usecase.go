@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"sysemp_feed/config"
-	"sysemp_feed/repository"
+	"sysemp_travel/config"
+	"sysemp_travel/repository"
 )
 
 type AuthUseCase struct {

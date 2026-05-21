@@ -2,8 +2,8 @@ package controller
 
 import (
 	"net/http"
-	"sysemp_feed/auth"
-	"sysemp_feed/usecase"
+	"sysemp_travel/auth"
+	"sysemp_travel/usecase"
 
 	"github.com/gin-gonic/gin"
 )
