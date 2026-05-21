@@ -19,6 +19,9 @@ services:
       DB_PASSWORD: eyJhbGciOiJIUzI1Ni
       DB_NAME: sysemp_feed_db
       REDIS_ADDR: redis:6379
+      RATE_LIMIT_ENABLED: "${RATE_LIMIT_ENABLED:-true}"
+      RATE_LIMIT_REQUESTS: "${RATE_LIMIT_REQUESTS:-10}"
+      RATE_LIMIT_WINDOW_SECONDS: "${RATE_LIMIT_WINDOW_SECONDS:-60}"
 
 
   sysemp_feed_db:

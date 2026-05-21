@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"strconv"
+	"strings"
 	"sysemp_feed/auth"
 	"sysemp_feed/controller"
 	"sysemp_feed/db"
@@ -41,19 +44,26 @@ func main() {
 	// REDIS
 	// =========================
 
-	redisClient := redis.NewClient(&redis.Options{
-		Addr: getEnv("REDIS_ADDR", "redis:6379"),
-	})
+	if getBoolEnv("RATE_LIMIT_ENABLED", true) {
+		redisClient := redis.NewClient(&redis.Options{
+			Addr: getEnv("REDIS_ADDR", "redis:6379"),
+		})
 
-	defer redisClient.Close()
+		defer redisClient.Close()
 
-	rateLimiter := middleware.NewRateLimiter(
-		redisClient,
-		10,
-		time.Minute,
-	)
+		rateLimitRequests := getIntEnv("RATE_LIMIT_REQUESTS", 10)
+		rateLimitWindowSeconds := getIntEnv("RATE_LIMIT_WINDOW_SECONDS", 60)
 
-	server.Use(middleware.RateLimiterMiddleware(rateLimiter))
+		rateLimiter := middleware.NewRateLimiter(
+			redisClient,
+			rateLimitRequests,
+			time.Duration(rateLimitWindowSeconds)*time.Second,
+		)
+
+		fmt.Printf("Rate limiter enabled: %d requests per %d seconds\n", rateLimitRequests, rateLimitWindowSeconds)
+
+		server.Use(middleware.RateLimiterMiddleware(rateLimiter))
+	}
 
 	// =========================
 	// DEPENDENCY INJECTION
@@ -90,4 +100,32 @@ func getEnv(key string, fallback string) string {
 	}
 
 	return value
+}
+
+func getIntEnv(key string, fallback int) int {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return fallback
+	}
+
+	number, err := strconv.Atoi(value)
+	if err != nil || number <= 0 {
+		return fallback
+	}
+
+	return number
+}
+
+func getBoolEnv(key string, fallback bool) bool {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return fallback
+	}
+
+	parsed, err := strconv.ParseBool(value)
+	if err != nil {
+		return fallback
+	}
+
+	return parsed
 }

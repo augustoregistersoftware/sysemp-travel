@@ -18,10 +18,10 @@ func NewAuthUsecase(userRepo *repository.UserRepository) *AuthUseCase {
 	}
 }
 
-func (a *AuthUseCase) ValidateCredentials(ctx context.Context, email, password string) (string, bool, error) {
-	email = strings.TrimSpace(email)
+func (a *AuthUseCase) ValidateCredentials(ctx context.Context, userOrEmail, password string) (string, bool, error) {
+	userOrEmail = strings.TrimSpace(userOrEmail)
 
-	user, err := a.userRepo.FindByEmail(ctx, email)
+	user, err := a.userRepo.FindByUsername(ctx, userOrEmail)
 	if err != nil {
 		return "", false, err
 	}

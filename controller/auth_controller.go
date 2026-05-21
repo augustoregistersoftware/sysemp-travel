@@ -14,7 +14,7 @@ type authController struct {
 }
 
 type loginRequest struct {
-	Email    string `json:"email"`
+	User     string `json:"user"`
 	Password string `json:"password"`
 }
 
@@ -30,6 +30,7 @@ func NewAuthController(
 
 func (a *authController) Login(ctx *gin.Context) {
 	var req loginRequest
+
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "body invalid"})
 		return
@@ -37,7 +38,7 @@ func (a *authController) Login(ctx *gin.Context) {
 
 	username, valid, err := a.authUseCase.ValidateCredentials(
 		ctx.Request.Context(),
-		req.Email,
+		req.User,
 		req.Password,
 	)
 

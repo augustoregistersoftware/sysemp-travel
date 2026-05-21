@@ -24,11 +24,11 @@ func NewUserRepository(baseRepo *Repository) UserRepository {
 	}
 }
 
-func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*User, error) {
+func (r *UserRepository) FindByUsername(ctx context.Context, userOrEmail string) (*User, error) {
 	var user User
-	err := r.DB.QueryRowContext(ctx, "SELECT id_user, username, password FROM users WHERE email = $1",
-		email).Scan(&user.ID, &user.Username, &user.PasswordHash)
-	fmt.Println("FindByEmail error:", err)
+	err := r.DB.QueryRowContext(ctx, "SELECT id_user, username, password FROM users WHERE username = $1 OR email = $1",
+		userOrEmail).Scan(&user.ID, &user.Username, &user.PasswordHash)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -70,13 +70,13 @@ func (r *UserRepository) CreateUserApprove(ctx context.Context, id int64) error 
 func (ur *UserRepository) CreateUser(ctx context.Context, user model.User) (int, error) {
 	var id_user int
 
-	retornoUser, err := ur.FindByEmail(ctx, user.Email)
+	retornoUser, err := ur.FindByUsername(ctx, user.Username)
 	if err != nil {
 		return 0, err
 	}
 
 	if retornoUser != nil {
-		return 409, fmt.Errorf("email already exists")
+		return 409, fmt.Errorf("user already exists")
 	}
 
 	passwordEncrypted, err := config.HashPassword(user.Password)
