@@ -137,3 +137,49 @@ func (ur *UserRepository) ReproveUser(ctx context.Context, id string) error {
 
 	return nil
 }
+
+func (ur *UserRepository) Users(ctx context.Context) ([]model.UserReturn, error) {
+	rows, err := ur.DB.QueryContext(
+		ctx,
+		"SELECT id_user, username, email FROM users",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.UserReturn
+	for rows.Next() {
+		var user model.UserReturn
+		err := rows.Scan(&user.ID, &user.Username, &user.Email)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+func (ur *UserRepository) UsersApprovedList(ctx context.Context) ([]model.UserApproved, error) {
+	rows, err := ur.DB.QueryContext(
+		ctx,
+		"SELECT email_user,created_at,id_approved_users FROM approved_users WHERE negated = false",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.UserApproved
+	for rows.Next() {
+		var user model.UserApproved
+		err := rows.Scan(&user.Email, &user.CreatedAt, &user.ID)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}

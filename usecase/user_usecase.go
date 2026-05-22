@@ -32,3 +32,11 @@ func (u *UserUseCase) ApproveUser(ctx context.Context, id string) error {
 func (u *UserUseCase) ReproveUser(ctx context.Context, id string) error {
 	return u.repository.ReproveUser(ctx, id)
 }
+
+func (u *UserUseCase) Users(ctx context.Context) ([]model.UserReturn, error) {
+	return u.repository.Users(ctx)
+}
+
+func (u *UserUseCase) UsersApprovedList(ctx context.Context) ([]model.UserApproved, error) {
+	return u.repository.UsersApprovedList(ctx)
+}

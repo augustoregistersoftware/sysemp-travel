@@ -20,7 +20,7 @@ func NewPaymentsController(paymentsUseCase usecase.PaymentsUseCase) paymentsCont
 func (c *paymentsController) Payments(ctx *gin.Context) {
 	payments, err := c.PaymentsUseCase.GetPayments(ctx.Request.Context())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

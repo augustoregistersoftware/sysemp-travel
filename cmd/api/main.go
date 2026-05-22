@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sysemp_travel/auth"
+	"sysemp_travel/config"
 	"sysemp_travel/controller"
 	"sysemp_travel/db"
 	"sysemp_travel/middleware"
@@ -18,7 +19,15 @@ import (
 )
 
 func main() {
+	println(config.GetLogo())
+	// =========================
+	// Config Gin
+	// =========================
 	server := gin.Default()
+	err := server.SetTrustedProxies(nil)
+	if err != nil {
+		panic(err)
+	}
 
 	// =========================
 	// DATABASE
@@ -91,6 +100,9 @@ func main() {
 	// =========================
 	server.POST("/login", authController.Login)
 	server.POST("/create_user", UserController.CreateUser)
+	server.GET("/users", UserController.Users)
+	server.GET("/users_approved_list", UserController.UsersApprovedList)
+
 	server.PATCH("/reproved_user/:id", UserController.ReproveUser)
 	server.DELETE("/approved_user/:id", UserController.ApproveUser)
 
