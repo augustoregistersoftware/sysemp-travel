@@ -38,7 +38,7 @@ name_pag VARCHAR(100),
 paid BOOLEAN);
 
 CREATE TABLE IF NOT EXISTS account_to_pay_payments (
-account_to_pay_payments SERIAL PRIMARY KEY,
+id_account_to_pay_payments SERIAL PRIMARY KEY,
 id_payments INT,
 id_account_to_pay INT
 );
