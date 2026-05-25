@@ -110,6 +110,7 @@ func main() {
 	server.DELETE("/approved_user/:id", UserController.ApproveUser)
 
 	server.GET("/payments", PaymentsController.Payments)
+	server.GET("/frankfurter_rate/:coin/:coin2", AccountToPayController.GetFrankfurterRate)
 	server.POST("/account_to_pay/:type", AccountToPayController.CreateAccountToPay)
 
 	server.Run(":8080")

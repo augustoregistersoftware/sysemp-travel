@@ -2,6 +2,9 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"sysemp_travel/model"
 	"time"
 
@@ -49,4 +52,28 @@ func (act *AccountToPayRepository) NewAccountToPayInsert(ctx context.Context, ac
 		return err
 	}
 	return nil
+}
+
+func (act *AccountToPayRepository) GetFrankfurterRate(ctx context.Context, coin string, coin2 string) ([]model.FrankfurterRateResponse, error) {
+	url := "https://api.frankfurter.dev/v2/rate/" + coin + "/" + coin2
+
+	cliente := http.Client{Timeout: 10 * time.Second}
+
+	resp, err := cliente.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch Frankfurter rate: %d", resp.StatusCode)
+	}
+
+	var rateResponse model.FrankfurterRateResponse
+	if err := json.NewDecoder(resp.Body).Decode(&rateResponse); err != nil {
+		return nil, err
+	}
+	// rateResponse.Rate = math.Round(rateResponse.Rate) caso tenha a necessidade de arredondar o valor da taxa para um número inteiro
+
+	return []model.FrankfurterRateResponse{rateResponse}, nil
 }

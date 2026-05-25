@@ -12,3 +12,10 @@ type AccountToPay struct {
 	NAME_PAG            string  `json:"name_pag"`
 	PAID                bool    `json:"paid"`
 }
+
+type FrankfurterRateResponse struct { //api de contação de moedas https://www.frankfurter.app/docs/
+	Base  string  `json:"base"`
+	Quote string  `json:"quote"`
+	Date  string  `json:"date"`
+	Rate  float64 `json:"rate"`
+}

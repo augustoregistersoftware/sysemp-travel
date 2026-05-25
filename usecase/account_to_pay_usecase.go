@@ -25,3 +25,11 @@ func (u *AccountToPayUseCase) CreateAccountToPay(ctx context.Context, typ string
 		return nil
 	}
 }
+
+func (u *AccountToPayUseCase) GetFrankfurterRate(ctx context.Context, coin string, coin2 string) ([]model.FrankfurterRateResponse, error) {
+	response, err := u.repository.GetFrankfurterRate(ctx, coin, coin2)
+	if err != nil {
+		return []model.FrankfurterRateResponse{}, err
+	}
+	return response, nil
+}

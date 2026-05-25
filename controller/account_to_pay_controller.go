@@ -38,3 +38,23 @@ func (c *accountToPayController) CreateAccountToPay(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "Account to pay created successfully"})
 }
+
+func (c *accountToPayController) GetFrankfurterRate(ctx *gin.Context) {
+	coin := ctx.Param("coin")
+	if coin == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "coin query parameter is required"})
+		return
+	}
+	coin2 := ctx.Param("coin2")
+	if coin2 == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "coin2 query parameter is required"})
+		return
+	}
+
+	response, err := c.AccountToPayUseCase.GetFrankfurterRate(ctx.Request.Context(), coin, coin2)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"rate": response})
+}
