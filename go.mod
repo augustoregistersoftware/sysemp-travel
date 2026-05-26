@@ -19,7 +19,10 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
+	github.com/go-playground/errors/v5 v5.3.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/log/v8 v8.1.2 // indirect
+	github.com/go-playground/pkg/v5 v5.21.2 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.30.2 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
@@ -41,6 +44,7 @@ require (
 	golang.org/x/arch v0.22.0 // indirect
 	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/term v0.43.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
