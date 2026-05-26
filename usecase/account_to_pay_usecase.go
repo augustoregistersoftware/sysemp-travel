@@ -16,12 +16,12 @@ func NewAccountToPayUseCase(accountToPayRepo repository.AccountToPayRepository) 
 	}
 }
 
-func (u *AccountToPayUseCase) CreateAccountToPay(ctx context.Context, typ string, accountToPay model.AccountToPay) error {
+func (u *AccountToPayUseCase) CreateAccountToPay(ctx context.Context, typ string, accountToPay model.AccountToPay, idempotencyKey string) error {
 	if typ == "0" {
-		return u.repository.NewAccountToPayInsert(ctx, accountToPay)
+		return u.repository.NewAccountToPayInsert(ctx, accountToPay, idempotencyKey)
 	} else {
 		accountToPay.DESCRIPTION_DETAILS = accountToPay.DESCRIPTION_DETAILS + " - foreign payment"
-		return u.repository.NewAccountToPayInsert(ctx, accountToPay)
+		return u.repository.NewAccountToPayInsert(ctx, accountToPay, idempotencyKey)
 	}
 }
 
@@ -31,4 +31,8 @@ func (u *AccountToPayUseCase) GetFrankfurterRate(ctx context.Context, coin strin
 		return []model.FrankfurterRateResponse{}, err
 	}
 	return response, nil
+}
+
+func (u *AccountToPayUseCase) CheckIdempotency(ctx context.Context, idempotencyKey string) error {
+	return u.repository.CheckIdempotency(ctx, idempotencyKey)
 }

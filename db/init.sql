@@ -25,7 +25,7 @@ ALTER TABLE approved_users
 ADD COLUMN email_user VARCHAR(255) NOT NULL DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS account_to_pay (
-id_account_to_pay SERIAL PRIMARY KEY,
+id_account_to_pay uuid PRIMARY KEY,
 id_user INT,
 description varchar(100),
 description_details varchar(255),
@@ -35,7 +35,8 @@ value_pag DECIMAL(15,2),
 value_add DECIMAL(15,2),
 value_discount DECIMAL(15,2),
 name_pag VARCHAR(100),
-paid BOOLEAN);
+paid BOOLEAN
+);
 
 CREATE TABLE IF NOT EXISTS account_to_pay_payments (
 id_account_to_pay_payments uuid PRIMARY KEY,
@@ -70,3 +71,9 @@ ADD coin VARCHAR(4);
 
 ALTER TABLE account_to_pay_payments
 ADD value_coin DECIMAL(10,4);
+
+CREATE TABLE IF NOT EXISTS account_to_pay_idempotency (
+    idempotency_key UUID primary key,
+    id_action UUID,
+    created_at TIMESTAMP DEFAULT NOW()
+);

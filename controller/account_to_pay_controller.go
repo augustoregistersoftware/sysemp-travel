@@ -7,6 +7,7 @@ import (
 	"sysemp_travel/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type accountToPayController struct {
@@ -30,7 +31,26 @@ func (c *accountToPayController) CreateAccountToPay(ctx *gin.Context) {
 		return
 	}
 
-	err = c.AccountToPayUseCase.CreateAccountToPay(ctx.Request.Context(), typ, accountToPay)
+	validate := validator.New()
+	err = validate.Struct(accountToPay)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	idempotencyKey := ctx.Request.Header.Get("Idempotency-Key")
+	if idempotencyKey == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Idempotency-Key required"})
+		return
+	}
+
+	err = c.AccountToPayUseCase.CheckIdempotency(ctx.Request.Context(), idempotencyKey)
+	if err != nil {
+		ctx.JSON(http.StatusConflict, gin.H{"error": "Duplicate request"})
+		return
+	}
+
+	err = c.AccountToPayUseCase.CreateAccountToPay(ctx.Request.Context(), typ, accountToPay, idempotencyKey)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
