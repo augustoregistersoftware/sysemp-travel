@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -10,9 +11,12 @@ import (
 	"sysemp_travel/controller"
 	"sysemp_travel/db"
 	"sysemp_travel/middleware"
+	"sysemp_travel/publisher"
 	"sysemp_travel/repository"
 	"sysemp_travel/usecase"
 	"time"
+
+	rabbitmq "sysemp_travel/rabbitMQ"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
@@ -50,29 +54,42 @@ func main() {
 	)
 
 	// =========================
+	// RABBITMQ
+	// =========================
+
+	rabbitConn, rabbitChannel := rabbitmq.ConnectRabbitMQ()
+
+	defer rabbitConn.Close()
+	defer rabbitChannel.Close()
+
+	_, err = rabbitmq.DeclareQueue(rabbitChannel, rabbitmq.PaymentCreatedQueue)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// =========================
 	// REDIS
 	// =========================
 
-	if getBoolEnv("RATE_LIMIT_ENABLED", true) {
-		redisClient := redis.NewClient(&redis.Options{
-			Addr: getEnv("REDIS_ADDR", "redis:6379"),
-		})
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: getEnv("REDIS_ADDR", "redis:6379"),
+	})
 
-		defer redisClient.Close()
+	defer redisClient.Close()
 
-		rateLimitRequests := getIntEnv("RATE_LIMIT_REQUESTS", 10)
-		rateLimitWindowSeconds := getIntEnv("RATE_LIMIT_WINDOW_SECONDS", 60)
+	rateLimitRequests := getIntEnv("RATE_LIMIT_REQUESTS", 10)
+	rateLimitWindowSeconds := getIntEnv("RATE_LIMIT_WINDOW_SECONDS", 60)
 
-		rateLimiter := middleware.NewRateLimiter(
-			redisClient,
-			rateLimitRequests,
-			time.Duration(rateLimitWindowSeconds)*time.Second,
-		)
+	rateLimiter := middleware.NewRateLimiter(
+		redisClient,
+		rateLimitRequests,
+		time.Duration(rateLimitWindowSeconds)*time.Second,
+	)
 
-		fmt.Printf("Rate limiter enabled: %d requests per %d seconds\n", rateLimitRequests, rateLimitWindowSeconds)
+	fmt.Printf("Rate limiter enabled: %d requests per %d seconds\n", rateLimitRequests, rateLimitWindowSeconds)
 
-		server.Use(middleware.RateLimiterMiddleware(rateLimiter))
-	}
+	server.Use(middleware.RateLimiterMiddleware(rateLimiter))
 
 	// =========================
 	// DEPENDENCY INJECTION
@@ -84,11 +101,17 @@ func main() {
 	userRepository := repository.NewUserRepository(baseRepository)
 	paymentsRepository := repository.NewPaymentsRepository(baseRepository)
 	AccountToPayRepository := repository.NewAccountToPayRepository(baseRepository)
+
+	// Publisher
+	paymentPublisher := publisher.NewPaymentPublisher(rabbitChannel)
+
 	// Use Cases
 	UserUseCase := usecase.NewUserUseCase(UserCreateRepository)
 	authUsecase := usecase.NewAuthUsecase(&userRepository)
 	PaymentsUseCase := usecase.NewPaymentsUseCase(paymentsRepository)
+	PaymentsPayUsecase := usecase.NewPaymentsPayUseCase(paymentsRepository, paymentPublisher, redisClient)
 	AccountToPayUseCase := usecase.NewAccountToPayUseCase(AccountToPayRepository)
+
 	// Controllers
 	authController := controller.NewAuthController(
 		authService,
@@ -96,6 +119,7 @@ func main() {
 	)
 	UserController := controller.NewUserController(UserUseCase)
 	PaymentsController := controller.NewPaymentsController(PaymentsUseCase)
+	PaymentsPayController := controller.NewPaymentsPayController(PaymentsPayUsecase)
 	AccountToPayController := controller.NewAccountToPayController(AccountToPayUseCase)
 
 	// =========================
@@ -112,7 +136,7 @@ func main() {
 	server.GET("/payments", PaymentsController.Payments)
 	server.GET("/frankfurter_rate/:coin/:coin2", AccountToPayController.GetFrankfurterRate)
 	server.POST("/account_to_pay/:type", AccountToPayController.CreateAccountToPay)
-
+	server.POST("/payments/pay", PaymentsPayController.Pay)
 	server.Run(":8080")
 }
 

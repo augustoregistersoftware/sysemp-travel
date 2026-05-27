@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"sysemp_travel/model"
+
+	"github.com/google/uuid"
 )
 
 type PaymentsRepository struct {
@@ -33,4 +35,11 @@ func (r *PaymentsRepository) GetPayments(ctx context.Context) ([]model.Payment, 
 	}
 
 	return payment, nil
+}
+
+func (r *PaymentsRepository) ProcessPayment(ctx context.Context, pay model.Pay) error {
+	uuid := uuid.NewString()
+	_, err := r.DB.ExecContext(ctx, "INSERT INTO account_to_pay_payments (id_account_to_pay, id_payments, id_account_to_pay_payments) VALUES ($1, $2, $3)", pay.AccountToPayID, pay.PaymentID, uuid)
+
+	return err
 }

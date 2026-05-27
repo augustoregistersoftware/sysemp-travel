@@ -11,6 +11,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
     environment:
       DB_HOST: sysemp_travel_db
@@ -22,6 +24,19 @@ services:
       RATE_LIMIT_ENABLED: "${RATE_LIMIT_ENABLED:-true}"
       RATE_LIMIT_REQUESTS: "${RATE_LIMIT_REQUESTS:-10}"
       RATE_LIMIT_WINDOW_SECONDS: "${RATE_LIMIT_WINDOW_SECONDS:-60}"
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+
+  worker:
+    image: sysemp-travel
+    command: ["worker"]
+    restart: unless-stopped
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
 
 
   sysemp_travel_db:
@@ -56,6 +71,19 @@ services:
 
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
       timeout: 5s
       retries: 10

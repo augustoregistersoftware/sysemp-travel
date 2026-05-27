@@ -41,12 +41,12 @@ paid BOOLEAN
 CREATE TABLE IF NOT EXISTS account_to_pay_payments (
 id_account_to_pay_payments uuid PRIMARY KEY,
 id_payments INT,
-id_account_to_pay INT
+id_account_to_pay uuid
 );
 
 CREATE TABLE IF NOT EXISTS account_to_pay_documents (
 id_account_to_pay_documents uuid PRIMARY KEY,
-id_account_to_pay INT,
+id_account_to_pay uuid,
 documents bytea
 );
 
